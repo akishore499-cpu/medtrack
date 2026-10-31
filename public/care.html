@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex"><title>MedTrack – Caregiver view</title>
+<style>
+:root{--bg:#f2f6f4;--card:#fff;--tx:#10302f;--mut:#5d7472;--ok:#1f8a5b;--warn:#c77700;--bad:#c0392b;--bd:#d5e1de}
+@media(prefers-color-scheme:dark){:root{--bg:#0c1a1a;--card:#122625;--tx:#e4f1ee;--mut:#8fb0ac;--bd:#244240;--ok:#4cc38a;--warn:#f0a53a;--bad:#ff7a6b}}
+*{box-sizing:border-box}body{margin:0;font:16px/1.5 system-ui,sans-serif;background:var(--bg);color:var(--tx)}
+.w{max-width:600px;margin:0 auto;padding:16px 16px 48px}h1{font:700 1.6rem Georgia,serif;margin:8px 0 0}
+.m{color:var(--mut);font-size:.9rem;margin:2px 0}h3{margin:0;font-size:1.05rem}
+.banner{border-left:5px solid var(--bad);background:var(--card);border-radius:10px;padding:10px 14px;margin:12px 0}
+.d{display:grid;grid-template-columns:62px 1fr;gap:6px;background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px;margin:10px 0}
+.d.missed{border-color:var(--bad)}.d.due{border-color:var(--warn)}
+time{font:700 1.3rem Georgia,serif}.chip{font-size:.8rem;font-weight:600;padding:1px 10px;border-radius:99px;border:1px solid currentColor;color:var(--mut);display:inline-block;margin-top:4px}
+.taken .chip{color:var(--ok)}.due .chip{color:var(--warn)}.missed .chip{color:var(--bad)}
+</style></head><body><div class="w">
+<h1 id="h">MedTrack</h1><p class="m" id="s">Loading…</p><div id="v" aria-live="polite"></div>
+<p class="m">Read-only view shared by the patient. It refreshes by itself every 30 seconds.</p></div>
+<script>
+const t=new URLSearchParams(location.search).get('t'),$=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const L={taken:'Taken',due:'Due now',missed:'Missed',upcoming:'Upcoming',skipped:'Skipped'};
+async function go(){
+  try{
+    const r=await fetch('/shared/'+encodeURIComponent(t||'')),j=await r.json();
+    if(!r.ok){$('#s').textContent='';$('#v').innerHTML=`<div class="banner">${esc(j.error)}</div>`;clearInterval(iv);return}
+    const n=j.doses.filter(x=>x.status==='taken').length,miss=j.doses.filter(x=>x.status==='missed').length;
+    $('#h').textContent=j.name+"'s medicines";$('#s').textContent=`Their local time: ${j.now} · ${n} of ${j.doses.length} doses taken today`;
+    $('#v').innerHTML=(miss?`<div class="banner"><b>${miss} missed dose${miss>1?'s':''} today.</b> Please check in with ${esc(j.name)}.</div>`:'')
+      +j.doses.map(x=>`<article class="d ${x.status}"><time>${x.time}</time><div><h3>${esc(x.name)}</h3><p class="m">${x.qty} ${esc(x.unit)}</p><span class="chip">${L[x.status]}</span></div></article>`).join('')
+      ||'<p class="m">Nothing scheduled today.</p>';
+  }catch{$('#s').textContent='Connection problem. Retrying…'}
+}
+go();const iv=setInterval(go,30000);
+</script></body></html>

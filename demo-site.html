@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>MedTrack – Demo presentation</title>
+<link rel="icon" href="/icon.svg"><meta name="theme-color" content="#0b7a75">
+<style>
+:root{--bg:#f2f6f4;--card:#fff;--tx:#10302f;--mut:#5d7472;--pri:#0b7a75;--onp:#fff;--ok:#1f8a5b;--warn:#c77700;--bad:#c0392b;--bd:#d5e1de}
+@media(prefers-color-scheme:dark){:root{--bg:#0c1a1a;--card:#122625;--tx:#e4f1ee;--mut:#8fb0ac;--pri:#3fc1b8;--onp:#062321;--bd:#244240;--ok:#4cc38a;--warn:#f0a53a;--bad:#ff7a6b}}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;font:16px/1.5 system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--tx);padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+.w{max-width:680px;margin:0 auto;padding:0 16px 48px}
+header{display:flex;align-items:center;gap:10px;padding:16px 0 4px}
+h1{font:700 1.7rem Georgia,serif;margin:0;flex:1}h2{font:700 1.2rem Georgia,serif;margin:28px 0 10px}h3{margin:0;font-size:1.05rem}p{margin:2px 0}
+.m{color:var(--mut);font-size:.9rem}
+button,input,select{font:inherit;color:inherit}
+button{border:1px solid var(--bd);background:var(--card);border-radius:10px;padding:8px 14px;min-height:44px;cursor:pointer}
+button.p,nav .on{background:var(--pri);border-color:var(--pri);color:var(--onp);font-weight:600}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--pri);outline-offset:2px}
+nav{display:flex;gap:6px;position:sticky;top:0;background:var(--bg);padding:8px 0;z-index:5}nav button{flex:1;padding:8px 4px}
+input,select{width:100%;padding:10px;min-height:44px;border:1px solid var(--bd);border-radius:8px;background:var(--card)}
+label{display:block;margin:12px 0;font-size:.9rem;color:var(--mut)}label input,label select{margin-top:4px;color:var(--tx)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+fieldset{border:1px solid var(--bd);border-radius:10px;margin:12px 0;padding:8px 12px 12px}legend{color:var(--mut);font-size:.9rem;padding:0 6px}
+.presets{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}#times{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-bottom:8px}
+.big{width:100%;margin-top:8px}.note{margin-top:12px}
+.card,.auth{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:16px}.auth{margin-top:32px}
+.banner{border-radius:10px;padding:10px 14px;margin:8px 0;border-left:5px solid;background:var(--card)}.banner.bad{border-color:var(--bad)}.banner.warn{border-color:var(--warn)}
+.sum{margin:12px 0}.sum b{font:700 1.5rem Georgia,serif}.bar{height:10px;background:var(--bd);border-radius:6px;margin-top:8px;overflow:hidden}.bar i{display:block;height:100%;background:var(--ok);transition:width .4s}
+.rail{border-left:2px solid var(--bd);margin-left:6px}
+.dose{display:grid;grid-template-columns:62px 1fr;gap:6px;position:relative;padding:6px 0 6px 14px}
+.dose::before{content:"";position:absolute;left:-8px;top:18px;width:14px;height:14px;border-radius:50%;background:var(--mut);border:3px solid var(--bg)}
+.dose.taken::before{background:var(--ok)}.dose.due::before{background:var(--warn)}.dose.missed::before{background:var(--bad)}
+.dose time{font:700 1.3rem Georgia,serif;padding-top:8px}
+.dose .c{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px}.dose.due .c{border-color:var(--warn)}.dose.missed .c{border-color:var(--bad)}
+.chip{display:inline-block;font-size:.8rem;font-weight:600;margin-top:6px;padding:1px 10px;border-radius:99px;border:1px solid currentColor;color:var(--mut)}
+.taken .chip{color:var(--ok)}.due .chip{color:var(--warn);animation:pulse 1.6s infinite}.missed .chip{color:var(--bad)}
+@keyframes pulse{50%{opacity:.4}}@media(prefers-reduced-motion:reduce){.due .chip{animation:none}.bar i{transition:none}}
+.act{display:flex;gap:8px;margin-top:10px}
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;height:130px;align-items:end;text-align:center}
+.week>div{height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;font-size:.75rem;color:var(--mut)}
+.week i{width:70%;background:var(--ok);border-radius:6px 6px 0 0;min-height:4px}.week i.part{background:var(--warn)}
+.med{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px;margin:8px 0}
+.empty{color:var(--mut);padding:16px 0}
+#toasts{position:fixed;top:calc(10px + env(safe-area-inset-top));left:10px;right:10px;display:grid;gap:8px;z-index:50;pointer-events:none}
+.toast{background:var(--tx);color:var(--bg);padding:12px 16px;border-radius:10px;max-width:480px;margin:0 auto;width:100%;font-weight:600}.toast.bad{background:var(--bad);color:#fff}
+dialog{border:0;border-radius:16px;padding:20px;width:min(440px,92vw);background:var(--card);color:var(--tx);box-shadow:0 20px 60px #0008}dialog::backdrop{background:#0009}
+.pop{border-left:5px solid var(--warn);padding:8px 12px;margin:10px 0;background:var(--bg);border-radius:8px}.pop.missed{border-color:var(--bad)}
+#err{color:var(--bad);min-height:1.4em}
+.pw{position:relative;display:block}.pw input{padding-right:50px}
+.pw .eye{position:absolute;right:2px;bottom:2px;width:44px;height:40px;min-height:0;padding:0;border:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235d7472' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z'/%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3C/svg%3E") center/22px no-repeat}
+.pw .eye.on{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235d7472' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24'/%3E%3Cpath d='M1 1l22 22'/%3E%3C/svg%3E")}
+
+html{scroll-padding-top:var(--ph,130px)}#toasts{top:calc(var(--ph,130px) + 8px)!important}nav{top:var(--ph,130px)}
+#pres{position:sticky;top:0;z-index:20;background:#0c1a1a;color:#e4f1ee;padding:calc(8px + env(safe-area-inset-top)) 12px 8px;box-shadow:0 2px 12px #0006}
+#pb{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px}
+#pres button{flex:none;min-height:34px;padding:2px 12px;border-radius:99px;background:#1d3a38;color:#e4f1ee;border:1px solid #2b5552;font-size:.85rem}
+#pres button.on{background:#3fc1b8;color:#062321;border-color:#3fc1b8;font-weight:700}
+#pt{display:block;font-size:1.05rem}#pd{font-size:.88rem;color:#b5d0cb}.dv{display:flex;gap:6px;margin-top:6px;align-items:center;font-size:.8rem;color:#8fb0ac}
+.w{transition:max-width .25s}@media(prefers-reduced-motion:reduce){.w{transition:none}}
+dialog[open]{position:fixed;top:calc(var(--ph,130px) + 12px);left:50%;transform:translateX(-50%);margin:0;z-index:15;max-height:70vh;overflow:auto}
+.w ul{padding-left:20px;margin:6px 0}.w li{margin:3px 0}
+</style></head><body>
+<div id="pres"><div id="pb"></div><b id="pt"></b><span id="pd"></span>
+<div class="dv">View as: <button data-w="390">Phone</button><button data-w="768">Tablet</button><button data-w="1100">Desktop</button> <span>Tip: use the left/right arrow keys to move between pages</span></div></div><div class="w">
+<section id="auth" class="auth" hidden>
+  <h1>MedTrack</h1><p class="m">Never miss a dose. Sign in or create a free account.</p>
+  <form id="af"><label>Name (new accounts)<input name="name" autocomplete="name"></label>
+  <label>Email<input name="email" type="email" required autocomplete="email"></label>
+  <span data-pw="password|Password|current-password"></span><span data-pw="confirm|Confirm password (new accounts only)|new-password"></span><p class="m">New passwords need 8+ characters with a letter and a number. Tap the eye to check what you typed.</p>
+  <p id="err" role="alert"></p>
+  <div class="act"><button class="p" data-a="login" type="button">Sign in</button><button data-a="register" type="button">Create account</button></div>
+  <p><button data-a="forgot" type="button" style="border:0;background:none;color:var(--pri);padding:0;text-decoration:underline">Forgot password?</button></p></form>
+</section>
+<section id="rs" class="auth" hidden>
+  <h1>New password</h1><p class="m">Choose a new password for your MedTrack account.</p>
+  <span data-pw="np|New password (8+ characters, letter and number)|new-password"></span><span data-pw="np2|Repeat new password|new-password"></span>
+  <p id="rerr" style="color:var(--bad)" role="alert"></p><button class="p" data-a="doreset">Save new password</button>
+</section>
+<section id="ov" class="card" hidden></section>
+<div id="app" hidden>
+  <header><h1>MedTrack</h1><span class="m" id="who"></span><button data-a="out">Sign out</button></header>
+  <nav><button data-a="tab" data-v="today">Today</button><button data-a="tab" data-v="meds">My medicines</button><button data-a="tab" data-v="add">Add medicine</button></nav>
+  <main id="v"></main>
+</div></div>
+<div id="toasts" aria-live="assertive"></div><dialog id="dlg"></dialog>
+<dialog id="pwd"><h2 style="margin-top:0">Confirm it's you</h2><p class="m" id="pwm"></p><span data-pw="pwx|Your password|current-password"></span><div class="act"><button data-a="pwno">Cancel</button><button class="p" data-a="pwyes">Confirm</button></div></dialog>
+<script>
+['localStorage','sessionStorage'].forEach(k=>{try{window[k].getItem('x')}catch{Object.defineProperty(window,k,{value:{getItem(){return null},setItem(){},removeItem(){},clear(){}}})}});
+const $=s=>document.querySelector(s), pad=n=>String(n).padStart(2,'0');
+const ymd=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`, hm=d=>pad(d.getHours())+':'+pad(d.getMinutes());
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const DAYS=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'], LABEL={taken:'Taken',due:'Take now',missed:'Missed',upcoming:'Upcoming',skipped:'Skipped'};
+let token=localStorage.t, who=localStorage.n, data, meds=[], tab='today', timer;
+const alerted=new Set(JSON.parse(sessionStorage.al||'[]'));
+
+async function api(p,o={}){
+  const r=await fetch('/api'+p,{...o,headers:{'Content-Type':'application/json',...(token&&{Authorization:'Bearer '+token})},body:o.body&&JSON.stringify(o.body)});
+  const j=await r.json().catch(()=>({}));
+  if(r.status===401&&token){out();throw new Error(j.error)}
+  if(!r.ok)throw new Error(j.error||'Something went wrong. Try again.');
+  return j;
+}
+function toast(m,c=''){const e=document.createElement('div');e.className='toast '+c;e.textContent=m;$('#toasts').append(e);setTimeout(()=>e.remove(),6000)}
+function beep(){try{const c=new AudioContext(),o=c.createOscillator();o.connect(c.destination);o.frequency.value=880;o.start();o.stop(c.currentTime+.3)}catch{}}
+
+// ---- Views ----
+const card=x=>`<article class="dose ${x.status}"><time>${x.time}</time><div class="c"><h3>${esc(x.name)}</h3>
+<p>${x.qty} ${esc(x.unit)}${x.instructions!=='Any time'?' · '+esc(x.instructions.toLowerCase()):''}</p>${x.disease?`<p class="m">For ${esc(x.disease)}</p>`:''}
+<span class="chip">${LABEL[x.status]}</span>${['due','missed','upcoming'].includes(x.status)?`<div class="act"><button class="p" data-a="take" data-m="${x.med_id}" data-time="${x.time}">Mark taken</button>${x.status!=='upcoming'?`<button data-a="skip" data-m="${x.med_id}" data-time="${x.time}">Skip</button>`:''}</div>`:''}</div></article>`;
+function todayView(){
+  const d=data.doses, n=d.filter(x=>x.status==='taken').length, miss=d.filter(x=>x.status==='missed').length;
+  return (localStorage.push?'':'<div class="banner warn"><b>Get alerts even when MedTrack is closed.</b><div class="act"><button class="p" data-a="push">Turn on alerts</button></div></div>')+(miss?`<div class="banner bad"><b>${miss} missed dose${miss>1?'s':''} today.</b> Do not double up. Ask your doctor or pharmacist what to do.</div>`:'')
+  +`<div class="sum"><b>${n} of ${d.length}</b> doses taken today<div class="bar"><i style="width:${d.length?n/d.length*100:0}%"></i></div></div>`
+  +`<div class="rail">${d.map(card).join('')||'<p class="empty">Nothing scheduled today. Add a medicine to start reminders.</p>'}</div>`
+  +`<h2>Last 7 days</h2><div class="week">${data.week.map(w=>`<div><span>${w.total?w.taken+'/'+w.total:'–'}</span><i class="${w.total&&w.taken<w.total?'part':''}" style="height:${w.total?w.taken/w.total*100:3}%"></i><span>${DAYS[new Date(w.date+'T00:00').getDay()]}</span></div>`).join('')}</div>`;
+}
+const medList=()=>meds.map(m=>`<article class="med"><div><h3>${esc(m.name)}</h3><p>${m.qty} ${esc(m.unit)} at ${m.times.join(', ')}</p>
+<p class="m">${m.disease?'For '+esc(m.disease)+' · ':''}${esc(m.instructions)}</p>${infoHtml(m)}</div><div class="act" style="margin:0"><button data-a="del" data-m="${m.id}">Delete</button></div></article>`).join('')||'<p class="empty">No medicines yet. Use “Add medicine”.</p>';
+// ---- Passwords: show/hide eye, and the "confirm it's you" popup ----
+const pwField=(n,l,a)=>`<label>${l}<span class="pw"><input id="${n}" name="${n}" type="password" autocomplete="${a}"><button type="button" class="eye" data-a="eye" aria-label="Show password"></button></span></label>`;
+document.querySelectorAll('[data-pw]').forEach(d=>{const[n,l,a]=d.dataset.pw.split('|');d.outerHTML=pwField(n,l,a)});
+let pwRes;
+function askPw(msg){$('#pwm').textContent=msg;$('#pwx').value='';$('#pwx').type='password';$('#pwd').showModal();$('#pwx').focus();return new Promise(r=>pwRes=r)}
+$('#pwd').addEventListener('close',()=>{pwRes?.(null)});
+// ---- Medicine bill: upload, review, add missing dose/times, schedule ----
+const U=['tablet(s)','capsule(s)','ml','drop(s)','puff(s)','unit(s)'],IN=['Any time','Before food','After food','With food','At bedtime'];
+const PRE={1:['08:00'],2:['08:00','20:00'],3:['08:00','14:00','20:00'],4:['08:00','12:00','16:00','20:00']};
+let bill=[];
+const sel=(o,v)=>o.map(x=>`<option${x.toLowerCase()===String(v||'').toLowerCase()?' selected':''}>${x}</option>`).join('');
+const infoHtml=m=>{try{const i=JSON.parse(m.info);return `<details><summary class="m">Why this medicine?</summary><p class="m"><b>For:</b> ${esc(i.p)}<br><b>Why prescribed:</b> ${esc(i.w)}${i.c?`<br><b>Good to know:</b> ${esc(i.c)}`:''}</p></details>`}catch{return ''}};
+const billView=()=>`<h2 style="margin-top:0">Medicines on your bill</h2><p class="m">Check each medicine. If the bill has no dose or times, enter them exactly as your doctor prescribed. Remove any you do not want reminders for.</p>
+${bill.map((m,i)=>`<div class="card bi" data-i="${i}" style="margin:12px 0">
+<div class="row"><label>Medicine<input data-f="name" value="${esc(m.name)}"></label><label>Strength<input data-f="strength" value="${esc(m.strength||'')}"></label></div>
+${m.purpose?`<div class="pop"><b>What it is for:</b> ${esc(m.purpose)}<br><b>Why your doctor may have prescribed it:</b> ${esc(m.why||'')}${m.caution?`<br><b>Good to know:</b> ${esc(m.caution)}`:''}</div>`:''}
+<div class="row"><label>Quantity per dose<input data-f="qty" type="number" min="0.25" step="0.25" value="${m.qty_per_dose||''}" placeholder="from doctor"></label>
+<label>Unit<select data-f="unit">${sel(U,m.form||'tablet(s)')}</select></label></div>
+<label>Times each day (as prescribed)<input data-f="times" value="${esc(m.timesText??(PRE[m.times_per_day]||[]).join(', '))}" placeholder="e.g. 08:00, 20:00"></label>
+<label>How to take<select data-f="instructions">${sel(IN,m.instructions||'Any time')}</select></label>
+<button data-a="drop" data-i="${i}">Remove</button></div>`).join('')}
+<div class="act"><button data-a="addrow">+ Add a medicine by hand</button></div>
+<button class="p big" data-a="savebill">Schedule all medicines</button>
+<p class="m note">Medicine information is general and may contain mistakes. Always follow your doctor's prescription, and ask your doctor or pharmacist if unsure.</p>`;
+function sync(){document.querySelectorAll('.bi').forEach(el=>{const m=bill[el.dataset.i],g=f=>el.querySelector(`[data-f=${f}]`).value;
+  m.name=g('name');m.strength=g('strength');m.qty_per_dose=g('qty');m.form=g('unit');m.instructions=g('instructions');m.timesText=g('times')})}
+const b64f=f=>new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(r.result.split(',')[1]);r.onerror=no;r.readAsDataURL(f)});
+async function prep(f){ // shrink phone photos so the upload stays small
+  if(f.type==='application/pdf'){if(f.size>5e6)throw new Error('That PDF is too large (max 5 MB).');return{mime:f.type,data:await b64f(f)}}
+  const bmp=await createImageBitmap(f),s=Math.min(1,1800/Math.max(bmp.width,bmp.height)),c=document.createElement('canvas');
+  c.width=bmp.width*s;c.height=bmp.height*s;c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);
+  return{mime:'image/jpeg',data:c.toDataURL('image/jpeg',.85).split(',')[1]};
+}
+async function scan(f){
+  toast('Reading your bill…');
+  try{
+    const p=await prep(f),r=await api('/bill/scan',{method:'POST',body:p});
+    if(!r.items.length)toast('No medicines found. Add them by hand.','bad');
+    bill=r.items.length?r.items:[{name:''}];tab='bill';render();window.scrollTo(0,0);
+  }catch(e){toast(e.message||'Could not open that file.','bad')}
+}
+async function saveBill(){
+  sync();const n=new Date(),list=[];
+  for(const m of bill){
+    if(!m.name?.trim())continue;
+    const times=(m.timesText.match(/\d{1,2}:\d{2}/g)||[]).map(t=>t.padStart(5,'0'));
+    if(!(+m.qty_per_dose>0)||!times.length){toast(`Add the dose and times for ${m.name}, as your doctor prescribed.`,'bad');return}
+    list.push({name:m.name.trim()+(m.strength?' '+m.strength.trim():''),disease:(m.purpose||'').slice(0,70),qty:+m.qty_per_dose,unit:m.form||'tablet(s)',
+      instructions:m.instructions||'Any time',times,start_date:ymd(n),today:ymd(n),now:hm(n),info:m.purpose?JSON.stringify({p:m.purpose,w:m.why,c:m.caution}):null});
+  }
+  if(!list.length)return toast('Add at least one medicine.','bad');
+  try{for(const b of list)await api('/medicines',{method:'POST',body:b});toast(`${list.length} medicine${list.length>1?'s':''} scheduled.`);bill=[];tab='today';await load();render()}
+  catch(e){toast(e.message,'bad')}
+}
+document.addEventListener('change',e=>{if(e.target.id==='bf'&&e.target.files[0])scan(e.target.files[0])});
+const accountCard=()=>`<h2>Account and security</h2><div class="card"><p class="m">Signed in as <b>${esc(who)}</b>. Your password is asked again before sensitive actions: deleting a medicine and deleting your account.</p>
+<form id="pf">${pwField('cur','Current password','current-password')}${pwField('nw','New password (8+ characters, letter and number)','new-password')}${pwField('nw2','Repeat new password','new-password')}
+<p id="perr" class="m" style="color:var(--bad)" role="alert"></p><button class="p">Change password</button></form>
+<div class="act" style="margin-top:12px"><button data-a="outall">Sign out of all devices</button><button data-a="delacct" style="color:var(--bad)">Delete my account</button></div></div>`;
+const medsView=()=>medList()+accountCard();
+const timeInput=(v='08:00')=>`<input type="time" value="${v}" required aria-label="Dose time">`;
+const addView=()=>`<div class="card" style="margin-bottom:12px"><b>Have a medicine bill?</b><p class="m">Upload a photo or PDF. We read the medicine names, then you add the dose and times your doctor prescribed.</p>
+<div class="act"><button class="p" data-a="pick">Upload bill</button></div><input type="file" id="bf" accept="image/*,application/pdf" hidden></div><form id="f"><label>Medicine name<input name="name" required></label>
+<label>Disease or problem<input name="disease" placeholder="e.g. High blood pressure"></label>
+<div class="row"><label>Quantity per dose<input name="qty" type="number" min="0.25" step="0.25" value="1" required></label>
+<label>Unit<select name="unit"><option>tablet(s)<option>capsule(s)<option>ml<option>drop(s)<option>puff(s)<option>unit(s)</select></label></div>
+<label>How to take<select name="instructions"><option>Any time<option>Before food<option>After food<option>With food<option>At bedtime</select></label>
+<fieldset><legend>Times each day</legend><div class="presets"><button type="button" data-a="pre" data-p="08:00">Once daily</button><button type="button" data-a="pre" data-p="08:00,20:00">Twice daily</button><button type="button" data-a="pre" data-p="08:00,14:00,20:00">Three times daily</button></div>
+<div id="times">${timeInput()}</div><button type="button" data-a="addt">+ Add another time</button></fieldset>
+<div class="row"><label>Start date<input name="start_date" type="date" value="${ymd(new Date())}" required></label><label>End date (optional)<input name="end_date" type="date"></label></div>
+<button class="p big">Save medicine</button><p class="m note">Enter the dose exactly as your doctor or pharmacist prescribed. MedTrack is a reminder tool, not medical advice.</p></form>`;
+function render(){
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===tab));
+  $('#v').innerHTML=tab==='today'?(data?todayView():'<p class="empty">Loading your medicines…</p>'):tab==='meds'?medsView():tab==='bill'?billView():addView();
+}
+
+// ---- Alerts: popup + sound + phone notification for each new due/missed dose ----
+function alertNew(){
+  const fresh=data.doses.filter(x=>{const k=data.date+x.med_id+x.time+x.status;if(!['due','missed'].includes(x.status)||alerted.has(k))return false;alerted.add(k);return true});
+  sessionStorage.al=JSON.stringify([...alerted]);
+  if(!fresh.length)return;
+  beep();
+  fresh.forEach(x=>{
+    toast(x.status==='due'?`Time to take ${x.name} (${x.qty} ${x.unit})`:`Missed: ${x.name} at ${x.time}`,x.status==='missed'?'bad':'');
+    if('Notification' in window&&Notification.permission==='granted')new Notification(x.status==='due'?'Time for '+x.name:'Missed dose: '+x.name,{body:`${x.qty} ${x.unit} · scheduled ${x.time}`});
+  });
+  $('#dlg').innerHTML='<h2 style="margin-top:0">Medicine alert</h2>'+fresh.map(x=>`<div class="pop ${x.status}"><b>${x.status==='due'?'Take now':'Missed dose'}:</b> ${esc(x.name)}, ${x.qty} ${esc(x.unit)} (scheduled ${x.time})
+  <div class="act"><button class="p" data-a="take" data-m="${x.med_id}" data-time="${x.time}">Mark taken</button></div></div>`).join('')+'<button data-a="close">Close</button>';
+  if(!$('#dlg').open)$('#dlg').showModal();
+}
+
+// ---- Data ----
+async function load(){
+  const n=new Date();
+  [data,meds]=await Promise.all([api(`/today?date=${ymd(n)}&now=${hm(n)}`),api('/medicines')]);
+  if(tab!=='add'&&tab!=='bill'&&!document.activeElement?.matches('input')&&![...document.querySelectorAll('#pf input')].some(i=>i.value))render(); // never re-render while a form field is being typed in
+  alertNew();
+}
+function boot(){
+  const rt=new URLSearchParams(location.search).get('reset');
+  $('#rs').hidden=!rt||!!token;$('#auth').hidden=!!token||!!rt;$('#app').hidden=!token;
+  if(!token)return;
+  $('#who').textContent=who;render();load().catch(e=>toast(e.message,'bad'));
+  clearInterval(timer);timer=setInterval(()=>load().catch(()=>{}),30000);
+}
+async function out(){
+  const t=token;token=null;localStorage.clear();clearInterval(timer);boot();
+  try{ // stop this device receiving the previous user's alerts
+    const s=await(await navigator.serviceWorker.getRegistration())?.pushManager.getSubscription();
+    if(s){if(t)await fetch('/api/push',{method:'DELETE',headers:{'Content-Type':'application/json',Authorization:'Bearer '+t},body:JSON.stringify({endpoint:s.endpoint})});await s.unsubscribe()}
+  }catch{}
+}
+const b64=s=>Uint8Array.from(atob(s.replace(/-/g,'+').replace(/_/g,'/')+'='.repeat((4-s.length%4)%4)),c=>c.charCodeAt(0));
+async function enablePush(){
+  try{
+    if(!('serviceWorker' in navigator&&'PushManager' in window))throw new Error('This browser cannot send background alerts. On iPhone, add MedTrack to the Home Screen first.');
+    if(await Notification.requestPermission()!=='granted')throw new Error('Notifications are blocked. Allow them in your browser settings.');
+    const reg=await navigator.serviceWorker.ready,{key}=await api('/push-key');
+    const sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64(key)});
+    await api('/push',{method:'POST',body:{sub,tz:Intl.DateTimeFormat().resolvedOptions().timeZone}});
+    localStorage.push=1;toast('Background alerts are on.');render();
+  }catch(e){toast(e.message,'bad')}
+}
+
+async function auth(kind){
+  try{
+    const f=Object.fromEntries(new FormData($('#af')));if(kind==='register'&&f.password!==f.confirm)throw new Error('The two passwords do not match.');
+    const r=await api('/'+kind,{method:'POST',body:f});
+    token=r.token;who=r.name;localStorage.t=token;localStorage.n=who;$('#err').textContent='';
+    if('Notification' in window&&Notification.permission==='default')Notification.requestPermission();
+    boot();
+  }catch(e){$('#err').textContent=e.message}
+}
+async function dose(b,status){
+  try{
+    await api('/doses',{method:'POST',body:{med_id:+b.dataset.m,date:data.date,time:b.dataset.time||b.dataset.time,status}});
+    toast(status==='taken'?'Marked as taken. Well done!':'Dose skipped.');
+    const p=b.closest('.pop');if(p){p.remove();if(!$('#dlg .pop'))$('#dlg').close()}
+    load();
+  }catch(e){toast(e.message,'bad')}
+}
+
+document.addEventListener('click',async e=>{
+  const b=e.target.closest('[data-a]');if(!b)return;
+  const a=b.dataset.a;
+  if(a==='login'||a==='register')auth(a);
+  else if(a==='out')out();
+  else if(a==='push')enablePush();
+  else if(a==='eye'){const i=b.parentElement.querySelector('input'),show=i.type==='password';i.type=show?'text':'password';b.classList.toggle('on',show);b.setAttribute('aria-label',show?'Hide password':'Show password')}
+  else if(a==='pwyes'){const v=$('#pwx').value;$('#pwd').close();pwRes?.(v)}
+  else if(a==='pwno')$('#pwd').close();
+  else if(a==='outall'){try{await api('/logout-all',{method:'POST'})}catch{}out()}
+  else if(a==='delacct'){const pw=await askPw('Enter your password to permanently delete your account and all your medicines.');if(pw==null)return;
+    try{await api('/account/delete',{method:'POST',body:{password:pw}});toast('Account deleted.');out()}catch(x){toast(x.message,'bad')}}
+  else if(a==='pick')$('#bf').click();
+  else if(a==='drop'){sync();bill.splice(+b.dataset.i,1);render()}
+  else if(a==='addrow'){sync();bill.push({name:''});render()}
+  else if(a==='savebill')saveBill();
+  else if(a==='forgot'){
+    const em=$('#af [name=email]').value;
+    if(!em){$('#err').textContent='Type your email above first.';return}
+    try{await api('/forgot',{method:'POST',body:{email:em}});$('#err').textContent='If that email is registered, a reset link is on its way.'}catch(x){$('#err').textContent=x.message}
+  }
+  else if(a==='doreset'){
+    if($('#np').value!==$('#np2').value){$('#rerr').textContent='The two passwords do not match.';return}
+    try{await api('/reset',{method:'POST',body:{token:new URLSearchParams(location.search).get('reset'),password:$('#np').value}});
+      history.replaceState({},'','/');toast('Password changed. Please sign in.');boot()}catch(x){$('#rerr').textContent=x.message}
+  }
+  else if(a==='tab'){tab=b.dataset.v;render()}
+  else if(a==='take')dose(b,'taken');
+  else if(a==='skip')dose(b,'skipped');
+  else if(a==='close')$('#dlg').close();
+  else if(a==='addt')$('#times').insertAdjacentHTML('beforeend',timeInput('12:00'));
+  else if(a==='pre')$('#times').innerHTML=b.dataset.p.split(',').map(timeInput).join('');
+  else if(a==='del'){
+    const pw=await askPw('Enter your password to delete this medicine and its history.');if(pw==null)return;
+    try{await api('/medicines/'+b.dataset.m,{method:'DELETE',body:{password:pw}});toast('Medicine deleted.');load()}catch(x){toast(x.message,'bad')}
+  }
+});
+document.addEventListener('submit',async e=>{
+  if(e.target.id==='pf'){e.preventDefault();const v=id=>$('#'+id).value;
+    if(v('nw')!==v('nw2')){$('#perr').textContent='The two new passwords do not match.';return}
+    try{await api('/password',{method:'POST',body:{password:v('cur'),newPassword:v('nw')}});e.target.reset();$('#perr').textContent='';toast('Password changed. Your other devices were signed out.')}
+    catch(x){$('#perr').textContent=x.message}return}
+  if(e.target.id!=='f')return;e.preventDefault();
+  const f=Object.fromEntries(new FormData(e.target)), n=new Date();
+  f.times=[...document.querySelectorAll('#times input')].map(i=>i.value);f.today=ymd(n);f.now=hm(n);
+  try{await api('/medicines',{method:'POST',body:f});toast('Medicine saved. Reminders are on.');tab='today';await load();render()}
+  catch(x){toast(x.message,'bad')}
+});
+const qs=new URLSearchParams(location.search);
+if(true){ // preview mode: sample data, no server or login needed
+  token='demo';who='Asha';
+  const I=(p,w,c)=>JSON.stringify({p,w,c});
+  const M=(id,name,disease,times,ins,stock,info)=>({id,name,disease,qty:1,unit:'tablet(s)',times,instructions:ins,stock,info});
+  const ms=[M(1,'Metformin 500 mg','Controls blood sugar',['08:00','20:00'],'After food',22,I('Helps control blood sugar in type 2 diabetes','Your doctor may prescribe it to keep your sugar levels steady.','Take with or after food to avoid stomach upset.')),
+    M(2,'Amlodipine 5 mg','Lowers blood pressure',['09:00'],'Any time',4,I('Relaxes blood vessels to lower blood pressure','Your doctor may prescribe it to protect your heart and kidneys.','Take it every day, even when you feel well.')),
+    M(3,'Vitamin D3','Keeps bones strong',['13:00'],'With food',40,null)];
+  const D=(id,name,disease,time,status,ins)=>({med_id:id,name,disease,qty:1,unit:'tablet(s)',instructions:ins,time,status});
+  const wk=[...Array(7)].map((_,i)=>{const d=new Date();d.setDate(d.getDate()-6+i);return{date:ymd(d),taken:[4,3,4,4,2,4,3][i],total:4}});
+  const routes={'/today':()=>({date:ymd(new Date()),week:wk,low:[],doses:[D(1,'Metformin 500 mg','Controls blood sugar','08:00','taken','After food'),
+    D(2,'Amlodipine 5 mg','Lowers blood pressure','09:00','missed','Any time'),D(3,'Vitamin D3','Keeps bones strong','13:00','due','With food'),D(1,'Metformin 500 mg','Controls blood sugar','20:00','upcoming','After food')]}),
+    '/medicines':()=>ms};
+  window.fetch=async u=>({ok:true,status:200,json:async()=>(routes[u.replace('/api','').split('?')[0]]||(()=>({ok:true})))()});
+  if(qs.get('tab')==='bill'){tab='bill';bill=[{name:'Metformin',strength:'500 mg',form:'tablet(s)',times_per_day:2,purpose:'Helps control blood sugar in type 2 diabetes',why:'Your doctor may prescribe it to keep sugar levels steady.',caution:'Take with or after food.'},
+    {name:'Pantoprazole',strength:'40 mg',purpose:'Reduces stomach acid',why:'Your doctor may prescribe it for acidity or to protect the stomach.',caution:'Usually taken before breakfast.'}]}
+  else if(qs.get('tab'))tab=qs.get('tab');
+}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&token)load().catch(()=>{})});
+boot();
+/* ===== Presentation controller (demo site only) ===== */
+HTMLDialogElement.prototype.showModal=function(){this.show()}; // popups must not block the presentation bar
+clearInterval(timer);window.beep=()=>{};const realAlert=alertNew;alertNew=()=>{}; // popups only on the alert page
+const only=id=>['ov','auth','rs','app'].forEach(x=>$('#'+x).hidden=x!==id);
+const fillAuth=o=>{only('auth');const f=$('#af');f.querySelector('[name=name]').value=o.name||'';f.querySelector('[name=email]').value=o.email||'';
+  $('#password').value=o.pw||'';$('#confirm').value=o.cf||'';$('#err').textContent=o.err||'';
+  document.querySelectorAll('#auth .eye').forEach(b=>{const i=b.parentElement.querySelector('input');i.type=o.show?'text':'password';b.classList.toggle('on',!!o.show)})};
+const BILL=[{name:'Metformin',strength:'500 mg',form:'tablet(s)',times_per_day:2,purpose:'Helps control blood sugar in type 2 diabetes',why:'Your doctor may prescribe it to keep sugar levels steady.',caution:'Take with or after food.'},
+  {name:'Pantoprazole',strength:'40 mg',purpose:'Reduces stomach acid',why:'Your doctor may prescribe it for acidity or to protect the stomach.',caution:'Usually taken before breakfast.'}];
+const view=async(t,after)=>{only('app');token='demo';who='Asha';tab=t;alerted.clear();await load();if($('#dlg').open)$('#dlg').close();$('#toasts').innerHTML='';render();if(after)after();window.scrollTo(0,0)};
+const hd=n=>[...document.querySelectorAll('#v h2')][n];
+const SC=[
+ ['Overview','MedTrack at a glance: the problem, the features and the technology.',()=>{only('ov');$('#ov').innerHTML=`<h1>MedTrack</h1><p class="m">Medicine schedule, dose reminders and missed-dose alerts</p>
+  <h2>The problem</h2><p>Patients forget doses, mix up timings, and often do not know why a medicine was prescribed.</p>
+  <h2>What it does</h2><ul><li>Daily timeline of doses with live status</li><li>Popup, sound and phone alerts, and automatic missed-dose detection</li><li>Upload a medicine bill; patient adds the doctor's dose and times</li><li>Plain-language note on why each medicine is given</li><li>Secure accounts: password eye, strong passwords, password re-check, reset by email</li></ul>
+  <h2>How it is built</h2><p><b>Frontend:</b> HTML, CSS, JavaScript (no framework, fast on any phone). <b>Backend:</b> Node.js with Express. <b>Database:</b> SQLite. <b>Bill reading:</b> AI reads a photo or PDF. <b>Works on:</b> phone, tablet and desktop.</p>`}],
+ ['1 Sign in','Patients sign in with email and password. The eye icon shows or hides what they typed.',()=>fillAuth({email:'asha@example.com',pw:'Asha@2026'})],
+ ['2 Create account','New accounts type the password twice. Rules: 8+ characters with a letter and a number. Here the eye is on, so the patient can check the spelling.',()=>fillAuth({name:'Asha Verma',email:'asha@example.com',pw:'Asha@2026',cf:'Asha@2026',show:true})],
+ ['3 Forgot password','Patients ask for a reset link by email. The same message appears whether or not the email exists, so strangers cannot find out who has an account.',()=>fillAuth({email:'asha@example.com',err:'If that email is registered, a reset link is on its way.'})],
+ ['4 New password','The emailed link opens this page. It works only once and for 30 minutes. After a reset, every device is signed out.',()=>{only('rs');$('#np').value='NewPass2026';$('#np2').value='NewPass2026'}],
+ ['5 Today','The timeline of today\'s doses with live status: taken, take now, missed, upcoming. Also a progress bar and a 7-day chart.',()=>view('today')],
+ ['6 Dose alert','At dose time a popup, a sound and a phone notification appear. If the dose is not logged for 60 minutes it becomes Missed and an alert is shown.',()=>view('today',()=>{alerted.clear();realAlert()})],
+ ['7 My medicines','Each medicine with dose and times. "Why this medicine?" explains in simple words what it is for and why a doctor prescribes it.',()=>view('meds',()=>{const d=document.querySelector('details');if(d)d.open=true})],
+ ['8 Add medicine','Add by hand: disease or problem, quantity, unit, times of day, food instructions and dates.',()=>view('add')],
+ ['9 Upload bill','Instead of typing, the patient uploads a photo or PDF of the pharmacy bill.',()=>view('add')],
+ ['10 Bill review','Medicines found on the bill, each with an easy explanation. If the shop did not print the dose or times, the patient types what the doctor prescribed. Nothing is guessed.',()=>{bill=JSON.parse(JSON.stringify(BILL));return view('bill')}],
+ ['11 Account security','Change password, sign out of all devices, or delete the account.',()=>view('meds',()=>{render();hd(0).scrollIntoView()})],
+ ['12 Password check','Sensitive actions ask for the password again: deleting a medicine and deleting the account.',()=>view('meds',()=>{askPw('Enter your password to delete this medicine and its history.');$('#pwx').value='Asha@2026'})]
+];
+let cur=0;
+async function go(i){cur=i;if($('#pwd').open)$('#pwd').close();if($('#dlg').open)$('#dlg').close();
+  document.querySelectorAll('#pb button').forEach((b,j)=>b.classList.toggle('on',j===i));$('#pt').textContent=SC[i][0];$('#pd').textContent=SC[i][1];
+  await SC[i][2]();document.documentElement.style.setProperty('--ph',$('#pres').offsetHeight+'px')}
+$('#pb').innerHTML=SC.map((x,i)=>`<button data-g="${i}">${x[0]}</button>`).join('');
+const width=w=>{document.querySelector('.w').style.maxWidth=w+'px';document.querySelectorAll('[data-w]').forEach(b=>b.classList.toggle('on',+b.dataset.w===+w));document.documentElement.style.setProperty('--ph',$('#pres').offsetHeight+'px')};
+$('#pres').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.g!=null)go(+b.dataset.g);if(b.dataset.w!=null)width(b.dataset.w)});
+document.addEventListener('keydown',e=>{if(e.target.matches('input,select,textarea'))return;if(e.key==='ArrowRight')go(Math.min(cur+1,SC.length-1));if(e.key==='ArrowLeft')go(Math.max(cur-1,0))});
+width(390);go(0);
+</script></body></html>

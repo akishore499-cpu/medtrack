@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MedTrack – Responsive demo</title>
+<style>
+body{margin:0;font:16px/1.5 system-ui,sans-serif;background:#dfe8e5;color:#10302f}
+header{padding:16px 20px}h1{margin:0;font:700 1.4rem Georgia,serif}p{margin:4px 0;color:#5d7472}
+.row{display:flex;gap:20px;padding:0 20px 24px;overflow-x:auto;align-items:flex-start}
+figure{margin:0;flex:none}figcaption{font-weight:600;margin-bottom:6px}
+iframe{display:block;height:760px;border:10px solid #10302f;border-radius:22px;background:#fff}
+.sw{display:flex;gap:8px;margin-top:8px}.sw a{padding:6px 12px;border-radius:99px;background:#fff;color:#0b7a75;text-decoration:none;font-weight:600}
+</style></head><body>
+<header><h1>MedTrack responsive demo</h1>
+<p>Each frame is a real browser width, so the page reacts exactly as it would on that device. Sample data, no login needed. Scroll sideways to see all three.</p>
+<div class="sw"><a href="?v=today">Today</a><a href="?v=meds">My medicines</a><a href="?v=add">Add medicine</a><a href="?v=bill">Bill review</a></div></header>
+<div class="row" id="r"></div>
+<script>
+const v=new URLSearchParams(location.search).get('v')||'today';
+document.getElementById('r').innerHTML=[['Phone',375],['Tablet',768],['Desktop',1200]].map(([n,w])=>
+  `<figure><figcaption>${n} (${w}px)</figcaption><iframe title="${n}" style="width:${w+20}px" src="/index.html?demo=1&tab=${v}"></iframe></figure>`).join('');
+</script></body></html>

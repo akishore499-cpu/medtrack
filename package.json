@@ -1,0 +1,9 @@
+{
+  "name": "medtrack",
+  "version": "1.0.0",
+  "description": "Medicine schedule, dose reminders and missed-dose alerts",
+  "main": "server.js",
+  "engines": { "node": ">=18" },
+  "scripts": { "start": "node server.js" },
+  "dependencies": { "better-sqlite3": ">=11.0.0", "express": "^4.19.2", "web-push": "^3.6.7", "nodemailer": ">=6.9.0" }
+}
